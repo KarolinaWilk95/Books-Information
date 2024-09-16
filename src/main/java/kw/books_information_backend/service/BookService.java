@@ -1,6 +1,8 @@
 package kw.books_information_backend.service;
 
 import kw.books_information_backend.NotFoundException;
+import kw.books_information_backend.dao.BookDAO;
+import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
 import kw.books_information_backend.repository.BookRepository;
 import org.springframework.stereotype.Service;
@@ -12,9 +14,11 @@ import java.util.Optional;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookDAO bookDAO;
 
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, BookDAO bookDAO) {
         this.bookRepository = bookRepository;
+        this.bookDAO = bookDAO;
     }
 
     public Book addOneBook(Book book) {
@@ -29,6 +33,9 @@ public class BookService {
         return bookRepository.findById(id);
     }
 
+    public List<Book> search(SearchRequest request) {
+        return bookDAO.findByCriteria(request);
+    }
 
     public Book updateBook(Long id, Book updatedBook) {
         Optional<Book> existingBook = bookRepository.findById(id);

@@ -1,19 +1,21 @@
 package kw.books_information_backend.dao;
 
+import java.util.Objects;
+
 public class SearchRequest {
-    private String authorname;
+    private String authorName;
     private String bookName;
     private String bookCategory;
     private Short yearOfPublication;
     private Byte rate;
 
 
-    public String getAuthorname() {
-        return authorname;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setAuthorname(String authorname) {
-        this.authorname = authorname;
+    public void setAuthorName(String authorname) {
+        this.authorName = authorname;
     }
 
     public String getBookName() {
@@ -46,5 +48,17 @@ public class SearchRequest {
 
     public void setRate(Byte rate) {
         this.rate = rate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SearchRequest that)) return false;
+        return Objects.equals(authorName, that.authorName) && Objects.equals(bookName, that.bookName) && Objects.equals(bookCategory, that.bookCategory) && Objects.equals(yearOfPublication, that.yearOfPublication) && Objects.equals(rate, that.rate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(authorName, bookName, bookCategory, yearOfPublication, rate);
     }
 }

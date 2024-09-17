@@ -2,7 +2,6 @@ package kw.books_information_backend.controller;
 
 import jakarta.validation.Valid;
 import kw.books_information_backend.NotFoundException;
-import kw.books_information_backend.dao.BookDAO;
 import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
 import kw.books_information_backend.service.BookService;
@@ -36,25 +35,6 @@ public class BookController {
         }
     }
 
-    @GetMapping("/api/books/search")
-    public List<Book> searchRequest(@RequestParam(name = "authorName", required = false) String authorName,
-                                    @RequestParam(name = "bookName", required = false) String bookName,
-                                    @RequestParam(name = "bookCategory", required = false) String bookCategory,
-                                    @RequestParam(name = "yearOfPublication", required = false) Short yearOfPublication,
-                                    @RequestParam(name = "rate", required = false) Byte rate
-    ) {
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setAuthorname(authorName);
-        searchRequest.setBookName(bookName);
-        searchRequest.setBookCategory(bookCategory);
-        searchRequest.setYearOfPublication(yearOfPublication);
-        searchRequest.setRate(rate);
-
-        return bookService.search(searchRequest);
-
-
-    }
-
     @PostMapping("/api/books")
     public Book addOneBook(@Valid @RequestBody Book book) {
         Book newBook = bookService.addOneBook(book);
@@ -79,6 +59,23 @@ public class BookController {
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/api/books/search")
+    public List<Book> searchRequest(@RequestParam(name = "authorName", required = false) String authorName,
+                                    @RequestParam(name = "bookName", required = false) String bookName,
+                                    @RequestParam(name = "bookCategory", required = false) String bookCategory,
+                                    @RequestParam(name = "yearOfPublication", required = false) Short yearOfPublication,
+                                    @RequestParam(name = "rate", required = false) Byte rate
+    ) {
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.setAuthorName(authorName);
+        searchRequest.setBookName(bookName);
+        searchRequest.setBookCategory(bookCategory);
+        searchRequest.setYearOfPublication(yearOfPublication);
+        searchRequest.setRate(rate);
+
+        return bookService.search(searchRequest);
     }
 
 }

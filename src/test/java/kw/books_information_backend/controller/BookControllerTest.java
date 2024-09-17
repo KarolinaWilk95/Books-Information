@@ -1,6 +1,7 @@
 package kw.books_information_backend.controller;
 
 import kw.books_information_backend.NotFoundException;
+import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
 import kw.books_information_backend.service.BookService;
 import org.junit.jupiter.api.Test;
@@ -161,4 +162,26 @@ class BookControllerTest {
         verify(bookService).deleteBook(bookID);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
+
+    @Test
+    void searchBook() {
+        // given
+        var request = new SearchRequest();
+        request.setBookName("Tango");
+        var book = new Book();
+        book.setBookName("Tango");
+        List<Book> bookList = new ArrayList<>();
+        bookList.add(book);
+
+        when(bookService.search(request)).thenReturn(bookList);
+        // when
+        var result = bookController.searchRequest(null,"Tango",null,null,null);
+        // then
+
+        verify(bookService).search(request);
+        assertThat(result).isEqualTo(bookList);
+
+    }
+
+
 }

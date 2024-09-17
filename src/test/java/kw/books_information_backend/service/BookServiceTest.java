@@ -1,6 +1,8 @@
 package kw.books_information_backend.service;
 
 import kw.books_information_backend.NotFoundException;
+import kw.books_information_backend.dao.BookDAO;
+import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
 import kw.books_information_backend.repository.BookRepository;
 import org.junit.jupiter.api.Test;
@@ -22,9 +24,12 @@ class BookServiceTest {
 
     @Mock
     private BookRepository bookRepository;
+    @Mock
+    private BookDAO bookDAO;
 
     @InjectMocks
     private BookService bookService;
+
 
     @Test
     void addOneBook() {
@@ -190,6 +195,25 @@ class BookServiceTest {
         // then
         verify(bookRepository).findById(bookID);
         assertThat(exception).hasMessage("Book not found");
+
+    }
+
+    @Test
+    void searchBook() {
+        // given
+        var request = new SearchRequest();
+        request.setBookName("Tango");
+        var book = new Book();
+        book.setBookName("Tango");
+        List<Book> bookName = new ArrayList<>();
+        bookName.add(book);
+
+        when(bookDAO.findByCriteria(request)).thenReturn(bookName);
+        // when
+        var result = bookService.search(request);
+        // then
+        verify(bookDAO).findByCriteria(request);
+        assertThat(result).isEqualTo(bookName);
 
     }
 }

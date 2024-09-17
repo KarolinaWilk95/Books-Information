@@ -29,8 +29,8 @@ public class BookDAO {
         List<Predicate> predicates = new ArrayList<>();
 
         Root<Book> root = cq.from(Book.class);
-        if (request.getAuthorname() != null) {
-            Predicate authorNamePredicate = cb.like(root.get("authorName"), "%" + request.getAuthorname() + "%");
+        if (request.getAuthorName() != null) {
+            Predicate authorNamePredicate = cb.like(root.get("authorName"), "%" + request.getAuthorName() + "%");
             predicates.add(authorNamePredicate);
         }
         if (request.getBookName() != null) {

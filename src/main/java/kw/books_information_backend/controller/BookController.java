@@ -31,7 +31,8 @@ public class BookController {
         if (book.isPresent()) {
             return ResponseEntity.ok(book.get());
         } else {
-            throw new NotFoundException("Book not found");
+//            throw new NotFoundException("Book not found");
+            return ResponseEntity.notFound().build();
         }
     }
 

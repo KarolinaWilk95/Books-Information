@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import kw.books_information_backend.NotFoundException;
 import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
+import kw.books_information_backend.model.Rating;
 import kw.books_information_backend.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,14 +39,23 @@ public class BookController {
 
     @PostMapping("/api/books")
     public Book addOneBook(@Valid @RequestBody Book book) {
-        Book newBook = bookService.addOneBook(book);
-        return this.bookService.addOneBook(newBook);
+        return bookService.addOneBook(book);
     }
 
     @PutMapping("/api/books/{id}")
-    public ResponseEntity<Void> updateBook(@Valid @PathVariable Long id, @RequestBody Book book) {
+    public ResponseEntity<Void> updateBook(@PathVariable Long id, @Valid @RequestBody Book book) {
         try {
             bookService.updateBook(id, book);
+            return ResponseEntity.ok().build();
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/api/books/{id}/ratings")
+    public ResponseEntity<Void> rateBook(@PathVariable Long id, @Valid @RequestBody Rating rating) {
+        try {
+            bookService.addRatingToBook(id, rating);
             return ResponseEntity.ok().build();
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();

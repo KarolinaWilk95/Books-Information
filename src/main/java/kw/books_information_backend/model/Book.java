@@ -2,10 +2,10 @@ package kw.books_information_backend.model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "Book")
@@ -26,23 +26,20 @@ public class Book { //fields
     @Column
     private short yearOfPublication;
 
-    @Column
-    @Min(1)
-    @Max(5)
-    private byte rate;
-
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "book_id", referencedColumnName = "id")
+    private Set<Rating> ratings = new HashSet<>();
 
     public Book() {
-
     }
 
-    public Book(Long id, String bookName, String authorName, String bookCategory, short yearOfPublication, byte rate) {
+    public Book(Long id, String bookName, String authorName, String bookCategory, short yearOfPublication, Set<Rating> ratings) {
         this.id = id;
         this.bookName = bookName;
         this.authorName = authorName;
         this.bookCategory = bookCategory;
         this.yearOfPublication = yearOfPublication;
-        this.rate = rate;
+        this.ratings = ratings;
     }
 
     public Long getId() {
@@ -85,12 +82,12 @@ public class Book { //fields
         this.yearOfPublication = yearOfPublication;
     }
 
-    public byte getRate() {
-        return rate;
+    public Set<Rating> getRatings() {
+        return ratings;
     }
 
-    public void setRate(byte rate) {
-        this.rate = rate;
+    public void setRatings(Set<Rating> ratings) {
+        this.ratings = ratings;
     }
 
     @Override
@@ -101,7 +98,7 @@ public class Book { //fields
                 ", authorName='" + authorName + '\'' +
                 ", bookCategory='" + bookCategory + '\'' +
                 ", yearOfPublication=" + yearOfPublication +
-                ", rate=" + rate +
+                ", rate=" + ratings +
                 '}';
     }
 
@@ -109,11 +106,11 @@ public class Book { //fields
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Book book)) return false;
-        return yearOfPublication == book.yearOfPublication && rate == book.rate && Objects.equals(id, book.id) && Objects.equals(bookName, book.bookName) && Objects.equals(authorName, book.authorName) && Objects.equals(bookCategory, book.bookCategory);
+        return yearOfPublication == book.yearOfPublication && Objects.equals(id, book.id) && Objects.equals(bookName, book.bookName) && Objects.equals(authorName, book.authorName) && Objects.equals(bookCategory, book.bookCategory);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, bookName, authorName, bookCategory, yearOfPublication, rate);
+        return Objects.hash(id, bookName, authorName, bookCategory, yearOfPublication);
     }
 }

@@ -4,6 +4,7 @@ import kw.books_information_backend.NotFoundException;
 import kw.books_information_backend.dao.BookDAO;
 import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
+import kw.books_information_backend.model.Rating;
 import kw.books_information_backend.repository.BookRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,7 +61,7 @@ class BookServiceTest {
         when(bookRepository.findAll()).thenReturn(savedBooks);
         // when
 
-        var result = bookRepository.findAll();
+        var result = bookService.getAllBooks();
 
         // then
 
@@ -96,7 +98,7 @@ class BookServiceTest {
         existingBook.setAuthorName("Mrożek");
         existingBook.setBookCategory("drame");
         existingBook.setYearOfPublication((short) 124);
-        existingBook.setRate((byte) 1);
+        existingBook.setRatings(Set.of(new Rating(1L, (byte) 3)));
 
         var updatedBook = new Book();
         updatedBook.setId(bookID);
@@ -104,7 +106,7 @@ class BookServiceTest {
         updatedBook.setAuthorName("Sławomir Mrożek");
         updatedBook.setBookCategory("drama");
         updatedBook.setYearOfPublication((short) 1964);
-        updatedBook.setRate((byte) 5);
+        updatedBook.setRatings(Set.of(new Rating(1L, (byte) 3)));
 
         when(bookRepository.findById(bookID)).thenReturn(Optional.of(existingBook));
         when(bookRepository.save(eq(updatedBook))).thenReturn(updatedBook);
@@ -129,7 +131,7 @@ class BookServiceTest {
         updatedBook.setAuthorName("Sławomir Mrożek");
         updatedBook.setBookCategory("drama");
         updatedBook.setYearOfPublication((short) 1964);
-        updatedBook.setRate((byte) 5);
+        updatedBook.setRatings(Set.of(new Rating(1L, (byte) 3)));
 
         when(bookRepository.findById(bookID)).thenReturn(Optional.empty());
 
@@ -164,6 +166,45 @@ class BookServiceTest {
         assertThat(result.getId()).isEqualTo(existingBookID);
     }
 
+    @Test
+    void addRatingIfBookExist() {
+        // given
+        var bookID = 1L;
+        var book = new Book();
+        Rating rating = new Rating(2L, (byte) 3);
+        book.setId(bookID);
+
+        when(bookRepository.findById(bookID)).thenReturn(Optional.of(book));
+        when(bookRepository.save(eq(book))).thenReturn(book);
+
+        // when
+        var result = bookService.addRatingToBook(1L, rating);
+
+        // then
+
+        verify(bookRepository).save(book);
+        assertThat(result).isEqualTo(book);
+        assertThat(result.getRatings()).containsOnly(rating);
+    }
+
+    @Test
+    void addRatingIfBootNotExist() {
+        // given
+        var bookID = 1L;
+        var book = new Book();
+        Rating rating = new Rating(2L, (byte) 3);
+        book.setId(bookID);
+
+        when(bookRepository.findById(bookID)).thenReturn(Optional.empty());
+
+        // when
+        var exception = assertThrows(NotFoundException.class, () -> bookService.addRatingToBook(bookID,rating));
+        // then
+
+        verify(bookRepository).findById(bookID);
+        assertThat(exception).hasMessage("Book not found");
+
+    }
 
     @Test
     void deleteBookIfExist() {

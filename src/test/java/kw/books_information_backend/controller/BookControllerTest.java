@@ -3,6 +3,7 @@ package kw.books_information_backend.controller;
 import kw.books_information_backend.NotFoundException;
 import kw.books_information_backend.dao.SearchRequest;
 import kw.books_information_backend.model.Book;
+import kw.books_information_backend.model.Rating;
 import kw.books_information_backend.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,11 +67,12 @@ class BookControllerTest {
         when(bookService.findBookById(bookID)).thenReturn(Optional.empty());
 
         // when
-        var exception = assertThrows(NotFoundException.class, () -> bookController.findBookById(bookID));
+        var result = bookController.findBookById(bookID);
 
         // then
         verify(bookService).findBookById(bookID);
-        assertThat(exception).hasMessage("Book not found");
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
     }
 
     @Test
@@ -82,7 +84,7 @@ class BookControllerTest {
         book.setId(1L);
         when(bookService.addOneBook(book)).thenReturn(newBook);
         // when
-        var result = bookService.addOneBook(book);
+        var result = bookController.addOneBook(book);
         // then
         verify(bookService).addOneBook(book);
         assertThat(result).isEqualTo(newBook);
@@ -98,7 +100,7 @@ class BookControllerTest {
         existingBook.setAuthorName("Mrożek");
         existingBook.setBookCategory("drame");
         existingBook.setYearOfPublication((short) 124);
-        existingBook.setRate((byte) 1);
+        existingBook.setRatings(Set.of(new Rating(1L, (byte) 3)));
 
         var updatedBook = new Book();
         updatedBook.setId(bookID);
@@ -106,15 +108,17 @@ class BookControllerTest {
         updatedBook.setAuthorName("Sławomir Mrożek");
         updatedBook.setBookCategory("drama");
         updatedBook.setYearOfPublication((short) 1964);
-        updatedBook.setRate((byte) 5);
+        updatedBook.setRatings(Set.of(new Rating(1L, (byte) 3)));
 
         when(bookService.updateBook(bookID, updatedBook)).thenReturn(updatedBook);
         // when
 
-        var result = bookService.updateBook(bookID, updatedBook);
+        var result = bookController.updateBook(bookID, updatedBook);
+
         // then
         verify(bookService).updateBook(bookID, updatedBook);
-        assertThat(result).isEqualTo(updatedBook);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isEqualTo(null);
     }
 
     @Test
@@ -131,6 +135,44 @@ class BookControllerTest {
 
         // then
         verify(bookService).updateBook(bookID, updatedBook);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void addRateIfBookExist() {
+        //given
+        var bookID = 1L;
+        var updatedBook = new Book();
+        Rating rating = new Rating(1L, (byte) 3);
+        updatedBook.setId(bookID);
+
+        when(bookService.addRatingToBook(bookID, rating)).thenReturn(updatedBook);
+        //when
+
+        var result = bookController.rateBook(bookID, rating);
+
+        //then
+
+        verify(bookService).addRatingToBook(bookID, rating);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isEqualTo(null);
+
+    }
+
+    @Test
+    void addRateIfBookNotExist() {
+        // given
+        var bookID = 1L;
+        var updatedBook = new Book();
+        updatedBook.setId(bookID);
+        Rating rating = new Rating(1L, (byte) 3);
+
+        when(bookService.addRatingToBook(bookID, rating)).thenThrow(NotFoundException.class);
+        // when
+        var result = bookController.rateBook(bookID, rating);
+        // then
+        verify(bookService).addRatingToBook(bookID, rating);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -175,7 +217,7 @@ class BookControllerTest {
 
         when(bookService.search(request)).thenReturn(bookList);
         // when
-        var result = bookController.searchRequest(null,"Tango",null,null,null);
+        var result = bookController.searchRequest(null, "Tango", null, null, null);
         // then
 
         verify(bookService).search(request);

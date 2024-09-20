@@ -42,7 +42,7 @@ public class BookDAO {
             predicates.add(bookCategoryPredicate);
         }
         if (request.getYearOfPublication() != null) {
-            Predicate bookYearOfPublicationPredicate = cb.like(root.get("yearOfPublication"), "%" + request.getYearOfPublication() + "%");
+            Predicate bookYearOfPublicationPredicate = cb.equal(root.get("yearOfPublication"), request.getYearOfPublication());
             predicates.add(bookYearOfPublicationPredicate);
         }
         if (request.getRate() != null) {
